@@ -1,8 +1,17 @@
-# GameLens
-GameLens is a Streamlit based webapp that interacts with SQLite Database to provide insights.
-It can be accessed at www.streamlit.io
 
-# Setup
-First you need to install streamlit using "$ pip install streamlit"
-You can test your installion using "$ streamlit hello"
-You can then run app.py in order to launch the app
+# GameLens
+
+GameLens is a web application built with Streamlit that interacts with an SQLite database to provide valuable insights. You can access it at [www.streamlit.io](http://www.streamlit.io).
+
+## Setup
+
+To get started, follow these steps:
+
+1. Install Streamlit:
+   ```sh
+   pip install streamlit
+   ```
+2. Run the app using:
+   ```sh
+   streamlit run app.py
+   ```
