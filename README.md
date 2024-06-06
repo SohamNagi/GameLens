@@ -15,4 +15,3 @@ To get started, follow these steps:
    ```sh
    streamlit run app.py
    ```
-It can also be accesed online via www.gamelens.streamlit.app
