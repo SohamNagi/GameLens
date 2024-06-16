@@ -20,8 +20,9 @@ def set_match_id():
 
 def main():
     # Explore matches path
+    st.button("Random match", on_click=set_match_id)
+
     if match_id is None:
-        st.button("Random match", on_click=set_match_id)
         return
 
     with get_conn().session as s:

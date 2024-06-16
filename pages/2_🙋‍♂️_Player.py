@@ -20,8 +20,9 @@ def set_player_id():
 
 def main():
     # Explore players path
+    st.button("Random player", on_click=set_player_id)
+
     if player_id is None:
-        st.button("Random player", on_click=set_player_id)
         return
 
     with get_conn().session as s:
