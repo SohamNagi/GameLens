@@ -13,6 +13,7 @@ def get_conn():
 def execute_query(query: str, params=None):
     with get_conn().session as s:
         result = s.execute(text(query), params)
+        s.commit()
     return result
 
 
