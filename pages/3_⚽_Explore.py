@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils.db import get_conn
+from utils.db import execute_query
 
 country_list = [
     'Belgium', 'England', 'France', 'Germany', 'Italy', 
@@ -10,8 +10,7 @@ country_list = [
 
 # Function to get leagues from the database
 def get_leagues():
-    with get_conn().session as s:
-        query = """
+    query = """
         SELECT 
             country.name AS country_name,
             league.name AS league_name
@@ -20,13 +19,12 @@ def get_leagues():
         ON country.id = league.country_id
         ORDER BY country.name
         """
-        leagues_result = s.execute(query)
-        leagues = leagues_result.fetchall()
+    leagues_result = execute_query(query)
+    leagues = leagues_result.fetchall()
     return leagues
 
 def get_matches(country):
-    with get_conn().session as s:
-        query = f"""
+    query = f"""
             SELECT Match.id, 
                     Country.name AS country_name, 
                     League.name AS league_name, 
@@ -46,14 +44,13 @@ def get_matches(country):
             ORDER by date ASC
             LIMIT 10
         """
-        matches_result = s.execute(query)
-        matches = matches_result.fetchall()
+    matches_result = execute_query(query)
+    matches = matches_result.fetchall()
     return matches
 
 def get_teams(country):
-    with get_conn().session as s:
-        query = f"""
-           SELECT DISTINCT Team.team_long_name
+    query = f"""
+            SELECT DISTINCT Team.team_long_name
             FROM Team
             JOIN Match ON Team.team_api_id = Match.away_team_api_id
             JOIN Country ON Match.country_id = Country.id
@@ -61,8 +58,8 @@ def get_teams(country):
             ORDER BY Country.name, Team.team_long_name
         
         """
-        teams_result = s.execute(query)
-        teams = teams_result.fetchall()
+    teams_result = execute_query(query)
+    teams = teams_result.fetchall()
     return teams
 
 
