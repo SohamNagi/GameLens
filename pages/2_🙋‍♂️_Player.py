@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.db import get_conn
+from utils.db import execute_query
 import pandas as pd
 
 st.set_page_config(page_title="Match", page_icon="🥅")
@@ -10,10 +10,9 @@ player_id = st.query_params.get(PLAYER_ID_PARAM)
 
 
 def set_player_id():
-    with get_conn().session as s:
-        random_id_query = "SELECT id FROM player ORDER BY RANDOM() LIMIT 1;"
-        random_id_result = s.execute(random_id_query)
-        random_id = random_id_result.first()[0]
+    random_id_query = "SELECT id FROM player ORDER BY RANDOM() LIMIT 1;"
+    random_id_result = execute_query(random_id_query)
+    random_id = random_id_result.first()[0]
 
     st.query_params[PLAYER_ID_PARAM] = random_id
 
@@ -25,24 +24,23 @@ def main():
     if player_id is None:
         return
 
-    with get_conn().session as s:
-        player_query = """
-        SELECT 
-            p.id,
-            p.height as height,
-            p.weight as weight,
-            p.player_name as name,
-            pa.potential as potential,
-            pa.overall_rating as rating,
-            pa.preferred_foot as preferred_foot
-        FROM
-            player p
-        INNER JOIN Player_Attributes pa ON p.player_api_id = pa.player_api_id
-        WHERE p.id = :player_id;
-        """
+    player_query = """
+    SELECT 
+        p.id,
+        p.height as height,
+        p.weight as weight,
+        p.player_name as name,
+        pa.potential as potential,
+        pa.overall_rating as rating,
+        pa.preferred_foot as preferred_foot
+    FROM
+        player p
+    INNER JOIN Player_Attributes pa ON p.player_api_id = pa.player_api_id
+    WHERE p.id = :player_id;
+    """
 
-        player_result = s.execute(player_query, {"player_id": player_id})
-        player = pd.DataFrame(player_result).iloc[0]
+    player_result = execute_query(player_query, {"player_id": player_id})
+    player = pd.DataFrame(player_result).iloc[0]
 
     st.header(f"Player {player['id']} details")
 
