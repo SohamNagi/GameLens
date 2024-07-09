@@ -34,11 +34,11 @@ def main():
         )
 
         matches = get_matches_for_league(league_id)
-        st.selectbox(
+        new_match_id = st.selectbox(
             "Match",
             matches.keys(),
             format_func=lambda x: f"{matches[x]['home_team_name']} vs {matches[x]['away_team_name']}",
-            on_change=set_match_id,
+            on_change=lambda: set_match_id(new_match_id),
         )
 
         st.subheader("Or pick a random match")
