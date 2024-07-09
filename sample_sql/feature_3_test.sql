@@ -1,1 +1,5 @@
-SELECT id,player_name FROM Player
+SELECT
+    id,
+    player_name
+FROM
+    Player

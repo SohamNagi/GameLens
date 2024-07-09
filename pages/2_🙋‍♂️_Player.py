@@ -29,9 +29,15 @@ def main():
         player_query = """
         SELECT 
             p.id,
-            p.player_name as name
+            p.height as height,
+            p.weight as weight,
+            p.player_name as name,
+            pa.potential as potential,
+            pa.overall_rating as rating,
+            pa.preferred_foot as preferred_foot
         FROM
             player p
+        INNER JOIN Player_Attributes pa ON p.player_api_id = pa.player_api_id
         WHERE p.id = :player_id;
         """
 
@@ -40,10 +46,47 @@ def main():
 
     st.header(f"Player {player['id']} details")
 
-    st.metric(
-        "Name",
-        player["name"],
-    )
+    basic, attributes = st.tabs(["Basic info", "Attributes"])
+
+    with basic:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                "Name",
+                player["name"],
+            )
+
+        with col2:
+            st.metric(
+                "Height",
+                f"{player['height']} cm",
+            )
+
+            st.metric(
+                "Weight",
+                f"{player['weight']} kg",
+            )
+
+    with attributes:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                "Overall rating",
+                player["rating"],
+            )
+
+        with col2:
+            st.metric(
+                "Potential",
+                player["potential"],
+            )
+
+            st.metric(
+                "Preferred foot",
+                player["preferred_foot"],
+            )
 
 
 main()

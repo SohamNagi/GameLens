@@ -1,1 +1,8 @@
-SELECT id FROM match ORDER BY RANDOM() LIMIT 1;
+SELECT
+    id
+FROM
+    match
+ORDER BY
+    RANDOM ()
+LIMIT
+    1;
