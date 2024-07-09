@@ -1,5 +1,10 @@
 import streamlit as st
-from utils.db import execute_query, get_leagues, get_matches_for_league
+from utils.db import (
+    execute_query,
+    get_leagues,
+    get_matches_for_league_and_season,
+    get_seasons_for_league,
+)
 import pandas as pd
 
 st.set_page_config(page_title="Match", page_icon="🥅")
@@ -33,7 +38,14 @@ def main():
             format_func=lambda x: leagues[x]["name"],
         )
 
-        matches = get_matches_for_league(league_id)
+        seasons = get_seasons_for_league(league_id)
+        season = st.selectbox(
+            "Season",
+            seasons.keys(),
+            format_func=lambda x: f"Season {x}",
+        )
+
+        matches = get_matches_for_league_and_season(league_id, season)
         new_match_id = st.selectbox(
             "Match",
             matches.keys(),

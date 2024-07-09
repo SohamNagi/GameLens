@@ -30,7 +30,22 @@ def get_leagues():
     return pd.DataFrame(league_result).set_index("id").to_dict(orient="index")
 
 
-def get_matches_for_league(league_id):
+def get_seasons_for_league(league_id):
+    season_query = """
+    SELECT 
+        m.season as season
+    FROM
+        match m
+    INNER JOIN League l ON m.league_id = l.id
+    WHERE l.id = :league_id
+    GROUP BY m.season;
+    """
+
+    season_result = execute_query(season_query, {"league_id": league_id})
+    return pd.DataFrame(season_result).set_index("season").to_dict(orient="index")
+
+
+def get_matches_for_league_and_season(league_id, season):
     match_query = """
     SELECT 
         m.id as id,
@@ -41,8 +56,11 @@ def get_matches_for_league(league_id):
     INNER JOIN League l ON m.league_id = l.id
     INNER JOIN team t1 ON m.home_team_api_id = t1.team_api_id
     INNER JOIN team t2 ON m.away_team_api_id = t2.team_api_id
-    WHERE l.id = :league_id;
+    WHERE l.id = :league_id AND m.season = :season;
     """
 
-    match_result = execute_query(match_query, {"league_id": league_id})
+    match_result = execute_query(
+        match_query, {"league_id": league_id, "season": season}
+    )
+
     return pd.DataFrame(match_result).set_index("id").to_dict(orient="index")
