@@ -3,3 +3,4 @@ database.sqlite
 .pylintrc
 utils/__pycache__
 Images
+utils

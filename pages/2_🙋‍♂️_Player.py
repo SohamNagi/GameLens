@@ -5,6 +5,7 @@ import pandas as pd
 st.set_page_config(page_title="Match", page_icon="🥅")
 
 PLAYER_ID_PARAM = "player_id"
+player_images = pd.read_csv('data/male_players.csv')
 
 player_id = st.query_params.get(PLAYER_ID_PARAM)
 
@@ -39,8 +40,30 @@ def main():
     WHERE p.id = :player_id;
     """
 
+    fifa_card_query = """
+        SELECT
+            p.player_fifa_api_id as fifa_id,
+            p.player_name as name,
+            pa.overall_rating as rating,
+            AVG(acceleration + sprint_speed) AS Pace,
+            AVG(attacking_position + finishing + shot_power + long_shots + volleys + penalties) AS Shooting,
+            AVG(vision + crossing + free_kick_accuracy + short_passing + long_passing + curve) AS Passing,
+            AVG(agility + balance + reactions + ball_control + dribbling + composure) AS Dribbling,
+            AVG(interceptions + heading_accuracy + defensive_awareness + standing_tackle + sliding_tackle) AS Defending,
+            AVG(jumping + stamina + strength + aggression) AS Physical
+        FROM
+            player p
+        INNER JOIN Player_Attributes pa ON p.player_api_id = pa.player_api_id
+        WHERE p.id = :player_id;
+    """
+
     player_result = execute_query(player_query, {"player_id": player_id})
+    player_stats_data = execute_query(
+        fifa_card_query, {"player_id": player_id})
+    card_stats = pd.DataFrame(player_stats_data).iloc[0]
     player = pd.DataFrame(player_result).iloc[0]
+    specific_player = player_images[player_images['player_fifa_api_id']
+                                    == card_stats["fifa_id"]]
 
     st.header(f"Player {player['id']} details")
 
@@ -85,6 +108,88 @@ def main():
                 "Preferred foot",
                 player["preferred_foot"],
             )
+
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&display=swap');
+    .card {
+        width: 395px;
+        height: 600px;
+        border-radius: 15px;
+        text-align: center;
+        background-image: url('https://i.ibb.co/C57HQyH/bg.png');
+        background-size: cover;
+        font-family: 'DIN Condensed', sans-serif;
+        position: relative;
+        color: black;
+    }
+    .rating, .position, .name {
+        margin: 0;
+    }
+    .rating {
+        font-size: 5em;
+        position: absolute;
+        top: 100px;
+        left: 71px;
+    }
+    .position {
+        font-size: 2em;
+        position: absolute;
+        top: 180px;
+        left: 85px;
+    }
+    .player-img {
+        width: 120px;
+        height: 120px;
+        position: absolute;
+        top: 200px;
+        left: 40%;
+        scale:2
+    }
+    .name {
+        font-size: 2.5em;
+        position: absolute;
+        bottom: 155px;
+        left: 53%;
+        transform: translateX(-50%);
+    }
+    .stats {
+        position: absolute;
+        bottom: 85px;
+        left: 25px;
+        width: 95%;
+        padding: 5px 40px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 2.5em;
+    }
+    .stat {
+        float: left;
+        text-align: center;
+    }
+    .stats div {
+        text-align: center;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class="card">
+        <div class="rating">{player['rating']}</div>
+        <div class="position">{player['position']}</div>
+        <img src="{specific_player['player_face_url']}" class="player-img">
+        <div class="name">{player['name']}</div>
+        <div class="stats">
+                <div class="stat">{card_stats['Pace']}</div>
+                <div class="stat">{card_stats['Shooting']}</div>
+                <div class="stat">{card_stats['Passing']}</div>
+                <div class="stat">{card_stats['Dribbling']}</div>
+                <div class="stat">{card_stats['Defending']}</div>
+                <div class="stat">{card_stats['Physical']}</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 main()
