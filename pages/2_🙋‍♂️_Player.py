@@ -5,7 +5,7 @@ import pandas as pd
 st.set_page_config(page_title="Match", page_icon="🥅")
 
 PLAYER_ID_PARAM = "player_id"
-player_images = pd.read_csv('data/male_players.csv')
+player_images = pd.read_csv('male_players.csv')
 
 player_id = st.query_params.get(PLAYER_ID_PARAM)
 
