@@ -26,7 +26,7 @@ def main():
         return
 
     player_query = """
-    SELECT 
+    SELECT
         p.id,
         p.height as height,
         p.weight as weight,
@@ -66,48 +66,6 @@ def main():
                                     == card_stats["fifa_id"]]
 
     st.header(f"Player {player['id']} details")
-
-    basic, attributes = st.tabs(["Basic info", "Attributes"])
-
-    with basic:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric(
-                "Name",
-                player["name"],
-            )
-
-        with col2:
-            st.metric(
-                "Height",
-                f"{player['height']} cm",
-            )
-
-            st.metric(
-                "Weight",
-                f"{player['weight']} kg",
-            )
-
-    with attributes:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric(
-                "Overall rating",
-                player["rating"],
-            )
-
-        with col2:
-            st.metric(
-                "Potential",
-                player["potential"],
-            )
-
-            st.metric(
-                "Preferred foot",
-                player["preferred_foot"],
-            )
 
     st.markdown("""
     <style>
@@ -190,6 +148,48 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    basic, attributes = st.tabs(["Basic info", "Attributes"])
+
+    with basic:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                "Name",
+                player["name"],
+            )
+
+        with col2:
+            st.metric(
+                "Height",
+                f"{player['height']} cm",
+            )
+
+            st.metric(
+                "Weight",
+                f"{player['weight']} kg",
+            )
+
+    with attributes:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric(
+                "Overall rating",
+                player["rating"],
+            )
+
+        with col2:
+            st.metric(
+                "Potential",
+                player["potential"],
+            )
+
+            st.metric(
+                "Preferred foot",
+                player["preferred_foot"],
+            )
 
 
 main()
