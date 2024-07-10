@@ -57,9 +57,17 @@ def main():
         WHERE p.id = :player_id;
     """
 
+    fifa_id_query = """
+        SELECT
+            p.player_fifa_api_id as fifa_id,
+        FROM
+            player p
+        WHERE p.id = :player_id;
+    """
+
     player_result = execute_query(player_query, {"player_id": player_id})
     player_stats_data = execute_query(
-        fifa_card_query, {"player_id": player_id})
+        fifa_id_query, {"player_id": player_id})
     card_stats = pd.DataFrame(player_stats_data).iloc[0]
     player = pd.DataFrame(player_result).iloc[0]
     specific_player = player_images[player_images['player_fifa_api_id']
@@ -139,12 +147,12 @@ def main():
         <img src="{specific_player['player_face_url']}" class="player-img">
         <div class="name">{player['name']}</div>
         <div class="stats">
-                <div class="stat">{card_stats['Pace']}</div>
-                <div class="stat">{card_stats['Shooting']}</div>
-                <div class="stat">{card_stats['Passing']}</div>
-                <div class="stat">{card_stats['Dribbling']}</div>
-                <div class="stat">{card_stats['Defending']}</div>
-                <div class="stat">{card_stats['Physical']}</div>
+                <div class="stat">{specific_player['pace']}</div>
+                <div class="stat">{specific_player['shooting']}</div>
+                <div class="stat">{specific_player['passing']}</div>
+                <div class="stat">{specific_player['dribbling']}</div>
+                <div class="stat">{specific_player['defending']}</div>
+                <div class="stat">{specific_player['physical']}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
