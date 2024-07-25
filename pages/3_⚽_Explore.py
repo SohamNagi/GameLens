@@ -62,6 +62,15 @@ def get_teams(country):
     teams = teams_result.fetchall()
     return teams
 
+def get_players():
+    query = """
+                SELECT player_name
+                FROM Player
+                ORDER BY player_name
+            """
+    players_result = execute_query(query)
+    players = players_result.fetchall()
+    return players
 
 
 #st.set_page_config(page_title="Explore", page_icon="⚽")
@@ -71,28 +80,35 @@ players_button = st.sidebar.button("Players")
 teams_button = st.sidebar.button("Teams Page")
 match_button = st.sidebar.button("Match")
 leagues_button = st.sidebar.button("Leagues")
+selected_country = st.selectbox('Select a country(Only for Match and Teams)', country_list)
 
-selected_country = st.selectbox('Select a country', country_list)
+if players_button:
+    #search_query = st.text_input('Search for a player')
+    players = get_players()
+    players_df = pd.DataFrame(players,columns = ["Player name"])
+    st.write("### ALL Players")
+    st.table(players_df)
+
+
 if teams_button and selected_country:
-    teams = get_teams(selected_country)
-    teams_df = pd.DataFrame(teams, columns = ["Team"])
-    st.write(f"### Teams in {selected_country}")
-    st.table(teams_df)
+        teams = get_teams(selected_country)
+        teams_df = pd.DataFrame(teams, columns = ["Team"])
+        st.write(f"### Teams in {selected_country}")
+        st.table(teams_df)
 
 if match_button and selected_country:
-    
-    matches = get_matches(selected_country)
-    matches_df = pd.DataFrame(matches, columns=[
-        'Match ID', 'Country', 'League', 'Season', 'Stage', 'Date', 
-        'Home Team', 'Away Team', 'Home Team Goals', 'Away Team Goals'
-    ])
-    st.write(f"### Matches in {selected_country}")
-    st.table(matches_df)
+        matches = get_matches(selected_country)
+        matches_df = pd.DataFrame(matches, columns=[
+            'Match ID', 'Country', 'League', 'Season', 'Stage', 'Date', 
+            'Home Team', 'Away Team', 'Home Team Goals', 'Away Team Goals'
+        ])
+        st.write(f"### Matches in {selected_country}")
+        st.table(matches_df)
 
 if leagues_button:
     leagues = get_leagues()
     # Convert the leagues data to a DataFrame
     leagues_df = pd.DataFrame(leagues, columns=['Country', 'League'])
-    st.write("### Leagues")
+    st.write("###  ALL Leagues")
     st.table(leagues_df)
 
