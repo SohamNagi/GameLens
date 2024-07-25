@@ -1,16 +1,20 @@
 import streamlit as st
-from utils.db import execute_query
+from utils.db import execute_query, get_players
 import pandas as pd
 
 st.set_page_config(page_title="Match", page_icon="🥅")
 
 PLAYER_ID_PARAM = "player_id"
-player_images = pd.read_csv('male_players.csv')
+# player_images = pd.read_csv("male_players.csv")
 
 player_id = st.query_params.get(PLAYER_ID_PARAM)
 
 
-def set_player_id():
+def set_player_id(selected_player_id):
+    st.query_params[PLAYER_ID_PARAM] = selected_player_id
+
+
+def set_random_player_id():
     random_id_query = "SELECT id FROM player ORDER BY RANDOM() LIMIT 1;"
     random_id_result = execute_query(random_id_query)
     random_id = random_id_result.first()[0]
@@ -20,9 +24,19 @@ def set_player_id():
 
 def main():
     # Explore players path
-    st.button("Random player", on_click=set_player_id)
+    st.button("Random player", on_click=set_random_player_id)
 
     if player_id is None:
+        st.title("Pick a player")
+
+        players = get_players()
+        selected_player_id = st.selectbox(
+            "Player",
+            players.keys(),
+            format_func=lambda x: players[x]["name"],
+            on_change=lambda: set_player_id(selected_player_id),
+        )
+
         return
 
     player_query = """
@@ -59,23 +73,24 @@ def main():
 
     fifa_id_query = """
         SELECT
-            p.player_fifa_api_id as fifa_id,
+            p.player_fifa_api_id as fifa_id
         FROM
             player p
         WHERE p.id = :player_id;
     """
 
     player_result = execute_query(player_query, {"player_id": player_id})
-    player_stats_data = execute_query(
-        fifa_id_query, {"player_id": player_id})
+    player_stats_data = execute_query(fifa_id_query, {"player_id": player_id})
     card_stats = pd.DataFrame(player_stats_data).iloc[0]
     player = pd.DataFrame(player_result).iloc[0]
-    specific_player = player_images[player_images['player_fifa_api_id']
-                                    == card_stats["fifa_id"]]
+    # specific_player = player_images[
+    #     player_images["player_fifa_api_id"] == card_stats["fifa_id"]
+    # ]
 
     st.header(f"Player {player['id']} details")
 
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&display=swap');
     .card {
@@ -138,24 +153,29 @@ def main():
     }
 
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
-    st.markdown(f"""
-    <div class="card">
-        <div class="rating">{player['rating']}</div>
-        <div class="position">{player['position']}</div>
-        <img src="{specific_player['player_face_url']}" class="player-img">
-        <div class="name">{player['name']}</div>
-        <div class="stats">
-                <div class="stat">{specific_player['pace']}</div>
-                <div class="stat">{specific_player['shooting']}</div>
-                <div class="stat">{specific_player['passing']}</div>
-                <div class="stat">{specific_player['dribbling']}</div>
-                <div class="stat">{specific_player['defending']}</div>
-                <div class="stat">{specific_player['physical']}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # st.markdown(
+    #     f"""
+    # <div class="card">
+    #     <div class="rating">{specific_player['rating']}</div>
+    #     <div class="position">{specific_player['position']}</div>
+    #     <img src="{specific_player['player_face_url']}" class="player-img">
+    #     <div class="name">{player['name']}</div>
+    #     <div class="stats">
+    #             <div class="stat">{specific_player['pace']}</div>
+    #             <div class="stat">{specific_player['shooting']}</div>
+    #             <div class="stat">{specific_player['passing']}</div>
+    #             <div class="stat">{specific_player['dribbling']}</div>
+    #             <div class="stat">{specific_player['defending']}</div>
+    #             <div class="stat">{specific_player['physical']}</div>
+    #     </div>
+    # </div>
+    # """,
+    #     unsafe_allow_html=True,
+    # )
 
     basic, attributes = st.tabs(["Basic info", "Attributes"])
 

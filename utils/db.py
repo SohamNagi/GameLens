@@ -30,6 +30,19 @@ def get_leagues():
     return pd.DataFrame(league_result).set_index("id").to_dict(orient="index")
 
 
+def get_players():
+    players_query = """
+    SELECT 
+        p.id as id,
+        p.player_name as name
+    FROM 
+        Player p;
+    """
+
+    player_result = execute_query(players_query)
+    return pd.DataFrame(player_result).set_index("id").to_dict(orient="index")
+
+
 def get_seasons_for_league(league_id):
     season_query = """
     SELECT 
