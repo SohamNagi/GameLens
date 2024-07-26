@@ -1,3 +1,2 @@
 import streamlit as st
-
-st.write("Hello world")
+st.switch_page("pages/2_🙋‍♂️_Player.py")
