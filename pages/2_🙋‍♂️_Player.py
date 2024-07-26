@@ -1,6 +1,7 @@
 import streamlit as st
-from utils.db import execute_query, get_players
 import pandas as pd
+from utils.db import execute_query, get_players
+
 
 st.set_page_config(page_title="Match", page_icon="🥅")
 
@@ -9,14 +10,17 @@ PLAYER_ID_PARAM = "player_id"
 player_id = st.query_params.get(PLAYER_ID_PARAM)
 
 df = pd.read_csv("male_players.csv")
+
+
 def get_player_stat(fifa_api_id, column):
     try:
-        value = df.loc[df['player_fifa_api_id'] == fifa_api_id, column].values[0]
+        value = df.loc[df['player_fifa_api_id']
+                       == fifa_api_id, column].values[0]
         return value
     except IndexError:
-        return "Player ID or column not found."
+        return "NULL"
     except KeyError:
-        return "Column not found."
+        return "NULL"
 
 
 def set_player_id(selected_player_id):
@@ -27,7 +31,6 @@ def set_random_player_id():
     random_id_query = "SELECT id FROM player ORDER BY RANDOM() LIMIT 1;"
     random_id_result = execute_query(random_id_query)
     random_id = random_id_result.first()[0]
-
     st.query_params[PLAYER_ID_PARAM] = random_id
 
 
@@ -63,7 +66,6 @@ def main():
     INNER JOIN Player_Attributes pa ON p.player_api_id = pa.player_api_id
     WHERE p.id = :player_id;
     """
-
 
     player_result = execute_query(player_query, {"player_id": player_id})
     player = pd.DataFrame(player_result).iloc[0]
@@ -112,9 +114,8 @@ def main():
                 "Preferred foot",
                 player["preferred_foot"],
             )
-            
     if player_found != "NULL":
-    # HTML and CSS for FIFA card
+        # HTML and CSS for FIFA card
         st.markdown(
             """
             <style>
