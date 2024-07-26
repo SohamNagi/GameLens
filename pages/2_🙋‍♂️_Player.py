@@ -5,9 +5,18 @@ import pandas as pd
 st.set_page_config(page_title="Match", page_icon="🥅")
 
 PLAYER_ID_PARAM = "player_id"
-# player_images = pd.read_csv("male_players.csv")
 
 player_id = st.query_params.get(PLAYER_ID_PARAM)
+
+df = pd.read_csv("male_players.csv")
+def get_player_stat(fifa_api_id, column):
+    try:
+        value = df.loc[df['player_fifa_api_id'] == fifa_api_id, column].values[0]
+        return value
+    except IndexError:
+        return "Player ID or column not found."
+    except KeyError:
+        return "Column not found."
 
 
 def set_player_id(selected_player_id):
@@ -45,6 +54,7 @@ def main():
         p.height as height,
         p.weight as weight,
         p.player_name as name,
+        p.player_fifa_api_id as fifaid,
         pa.potential as potential,
         pa.overall_rating as rating,
         pa.preferred_foot as preferred_foot
@@ -54,128 +64,12 @@ def main():
     WHERE p.id = :player_id;
     """
 
-    fifa_card_query = """
-        SELECT
-            p.player_fifa_api_id as fifa_id,
-            p.player_name as name,
-            pa.overall_rating as rating,
-            AVG(acceleration + sprint_speed) AS Pace,
-            AVG(attacking_position + finishing + shot_power + long_shots + volleys + penalties) AS Shooting,
-            AVG(vision + crossing + free_kick_accuracy + short_passing + long_passing + curve) AS Passing,
-            AVG(agility + balance + reactions + ball_control + dribbling + composure) AS Dribbling,
-            AVG(interceptions + heading_accuracy + defensive_awareness + standing_tackle + sliding_tackle) AS Defending,
-            AVG(jumping + stamina + strength + aggression) AS Physical
-        FROM
-            player p
-        INNER JOIN Player_Attributes pa ON p.player_api_id = pa.player_api_id
-        WHERE p.id = :player_id;
-    """
-
-    fifa_id_query = """
-        SELECT
-            p.player_fifa_api_id as fifa_id
-        FROM
-            player p
-        WHERE p.id = :player_id;
-    """
 
     player_result = execute_query(player_query, {"player_id": player_id})
-    player_stats_data = execute_query(fifa_id_query, {"player_id": player_id})
-    card_stats = pd.DataFrame(player_stats_data).iloc[0]
     player = pd.DataFrame(player_result).iloc[0]
-    # specific_player = player_images[
-    #     player_images["player_fifa_api_id"] == card_stats["fifa_id"]
-    # ]
-
+    fid = player['fifaid']
+    player_found = get_player_stat(fid, "short_name")
     st.header(f"Player {player['id']} details")
-
-    st.markdown(
-        """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&display=swap');
-    .card {
-        width: 395px;
-        height: 600px;
-        border-radius: 15px;
-        text-align: center;
-        background-image: url('https://i.ibb.co/C57HQyH/bg.png');
-        background-size: cover;
-        font-family: 'DIN Condensed', sans-serif;
-        position: relative;
-        color: black;
-    }
-    .rating, .position, .name {
-        margin: 0;
-    }
-    .rating {
-        font-size: 5em;
-        position: absolute;
-        top: 100px;
-        left: 71px;
-    }
-    .position {
-        font-size: 2em;
-        position: absolute;
-        top: 180px;
-        left: 85px;
-    }
-    .player-img {
-        width: 120px;
-        height: 120px;
-        position: absolute;
-        top: 200px;
-        left: 40%;
-        scale:2
-    }
-    .name {
-        font-size: 2.5em;
-        position: absolute;
-        bottom: 155px;
-        left: 53%;
-        transform: translateX(-50%);
-    }
-    .stats {
-        position: absolute;
-        bottom: 85px;
-        left: 25px;
-        width: 95%;
-        padding: 5px 40px;
-        display: flex;
-        justify-content: space-between;
-        font-size: 2.5em;
-    }
-    .stat {
-        float: left;
-        text-align: center;
-    }
-    .stats div {
-        text-align: center;
-    }
-
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    # st.markdown(
-    #     f"""
-    # <div class="card">
-    #     <div class="rating">{specific_player['rating']}</div>
-    #     <div class="position">{specific_player['position']}</div>
-    #     <img src="{specific_player['player_face_url']}" class="player-img">
-    #     <div class="name">{player['name']}</div>
-    #     <div class="stats">
-    #             <div class="stat">{specific_player['pace']}</div>
-    #             <div class="stat">{specific_player['shooting']}</div>
-    #             <div class="stat">{specific_player['passing']}</div>
-    #             <div class="stat">{specific_player['dribbling']}</div>
-    #             <div class="stat">{specific_player['defending']}</div>
-    #             <div class="stat">{specific_player['physical']}</div>
-    #     </div>
-    # </div>
-    # """,
-    #     unsafe_allow_html=True,
-    # )
 
     basic, attributes = st.tabs(["Basic info", "Attributes"])
 
@@ -218,6 +112,95 @@ def main():
                 "Preferred foot",
                 player["preferred_foot"],
             )
+            
+    if player_found != "NULL":
+    # HTML and CSS for FIFA card
+        st.markdown(
+            """
+            <style>
+            @import url('https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&display=swap');
+            .card {
+                width: 395px;
+                height: 600px;
+                border-radius: 15px;
+                text-align: center;
+                background-image: url('https://i.ibb.co/C57HQyH/bg.png');
+                background-size: cover;
+                font-family: 'DIN Condensed', sans-serif;
+                position: relative;
+                color: black;
+            }
+            .rating, .position, .name {
+                margin: 0;
+            }
+            .rating {
+                font-size: 5em;
+                position: absolute;
+                top: 100px;
+                left: 71px;
+            }
+            .position {
+                font-size: 2em;
+                position: absolute;
+                top: 180px;
+                left: 85px;
+            }
+            .player-img {
+                width: 120px;
+                height: 120px;
+                position: absolute;
+                top: 200px;
+                left: 40%;
+                scale:2
+            }
+            .name {
+                font-size: 2.5em;
+                position: absolute;
+                bottom: 155px;
+                left: 53%;
+                transform: translateX(-50%);
+            }
+            .stats {
+                position: absolute;
+                bottom: 85px;
+                left: 25px;
+                width: 95%;
+                padding: 5px 40px;
+                display: flex;
+                justify-content: space-between;
+                font-size: 2.5em;
+            }
+            .stat {
+                float: left;
+                text-align: center;
+            }
+            .stats div {
+                text-align: center;
+            }
 
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
+        # FIFA card content
+        st.markdown(
+            f"""
+            <div class="card">
+                <div class="rating">{get_player_stat(fid, 'overall')}</div>
+                <div class="position">{get_player_stat(fid, 'player_positions')[0:2]}</div>
+                <img src="{get_player_stat(fid, 'player_face_url')}" class="player-img">
+                <div class="name">{get_player_stat(fid, 'short_name')}</div>
+                <div class="stats">
+                    <div class="stat">{str(get_player_stat(fid, 'pace'))[0:2]}</div>
+                    <div class="stat">{str(get_player_stat(fid, 'shooting'))[0:2]}</div>
+                    <div class="stat">{str(get_player_stat(fid, 'passing'))[0:2]}</div>
+                    <div class="stat">{str(get_player_stat(fid, 'dribbling'))[0:2]}</div>
+                    <div class="stat">{str(get_player_stat(fid, 'defending'))[0:2]}</div>
+                    <div class="stat">{str(get_player_stat(fid, 'physic'))[0:2]}</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 main()
