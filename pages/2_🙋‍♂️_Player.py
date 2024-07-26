@@ -1,3 +1,4 @@
+import random
 import streamlit as st
 import pandas as pd
 from utils.db import execute_query, get_players
@@ -28,10 +29,16 @@ def set_player_id(selected_player_id):
 
 
 def set_random_player_id():
+    randids = [281, 8370, 1489, 5946, 3700, 2754, 4380, 4490, 1373, 1830, 475]
     random_id_query = "SELECT id FROM player ORDER BY RANDOM() LIMIT 1;"
     random_id_result = execute_query(random_id_query)
-    random_id = random_id_result.first()[0]
+    random_id = random.choice(randids)
+    randids.remove(random_id)
     st.query_params[PLAYER_ID_PARAM] = random_id
+
+
+def spi(player_id):
+    st.session_state["selected_player_id"] = player_id
 
 
 def main():
@@ -44,11 +51,11 @@ def main():
         players = get_players()
         selected_player_id = st.selectbox(
             "Player",
-            players.keys(),
+            list(players.keys()),  # Ensure this is a list
             format_func=lambda x: players[x]["name"],
-            on_change=lambda: set_player_id(selected_player_id),
+            on_change=lambda: set_player_id(st.session_state.player),
+            key='player'  # Define a key for the select box
         )
-
         return
 
     player_query = """
@@ -71,6 +78,7 @@ def main():
     player = pd.DataFrame(player_result).iloc[0]
     fid = player['fifaid']
     player_found = get_player_stat(fid, "short_name")
+    st.markdown(f'<a href="http://localhost:8501/Player" target="_self"><button>Return</button></a>', unsafe_allow_html=True)
     st.header(f"Player {player['id']} details")
 
     basic, attributes = st.tabs(["Basic info", "Attributes"])
@@ -204,4 +212,6 @@ def main():
             """,
             unsafe_allow_html=True,
         )
+
+
 main()
